@@ -40,26 +40,10 @@ class SummaryNotification extends Notification
         );
 
         return (new MailMessage)
-            ->subject($this->subject())
-            ->view($this->view(), [
+            ->subject('You have new notifications')
+            ->view('floodgate::summary', [
                 'summary' => $this->summary,
                 'items' => $items,
             ]);
-    }
-
-    /*
-     * Return the subject line for the summary email.
-     */
-    protected function subject(): string
-    {
-        return 'You have new notifications';
-    }
-
-    /*
-     * Return the view used to render the summary email.
-     */
-    protected function view(): string
-    {
-        return 'floodgate::summary';
     }
 }

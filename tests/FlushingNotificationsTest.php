@@ -44,7 +44,12 @@ class FlushingNotificationsTest extends TestCase
         Bus::dispatched(FlushNotifications::class)->first()->handle(app(FloodgateStore::class));
 
         // Then
-        Notification::assertSentTo($user, SummaryNotification::class);
+        Notification::assertSentTo($user, SummaryNotification::class, function ($notification) use ($user) {
+            return $notification->toArray($user) === [
+                'message' => ':count test notifications',
+                'properties' => ['count' => 3],
+            ];
+        });
         Notification::assertNotSentTo($user, TestNotification::class);
     }
 
