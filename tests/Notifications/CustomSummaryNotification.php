@@ -2,4 +2,6 @@
 
 namespace TestMonitor\Floodgate\Tests\Notifications;
 
-class CustomSummaryNotification extends \TestMonitor\Floodgate\Notifications\SummaryNotification {}
+use TestMonitor\Floodgate\Notifications\SummaryNotification;
+
+class CustomSummaryNotification extends SummaryNotification {}
