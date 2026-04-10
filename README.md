@@ -2,7 +2,7 @@
 
 [![Latest Stable Version](https://poser.pugx.org/testmonitor/notify-floodgate/v/stable)](https://packagist.org/packages/testmonitor/notify-floodgate)
 [![CircleCI](https://img.shields.io/circleci/project/github/testmonitor/notify-floodgate.svg)](https://circleci.com/gh/testmonitor/notify-floodgate)
-[![StyleCI](https://styleci.io/repos/notify-floodgate/shield)](https://styleci.io/repos/notify-floodgate)
+[![StyleCI](https://styleci.io/repos/1206988940/shield)](https://styleci.io/repos/1206988940)
 [![License](https://poser.pugx.org/testmonitor/notify-floodgate/license)](https://packagist.org/packages/testmonitor/notify-floodgate)
 
 A Laravel package that prevents notification floods by buffering queued notifications within a time window. When a single notification arrives, it is sent as-is. When multiple notifications of the same type arrive within the window, they are grouped into a single summary notification.
