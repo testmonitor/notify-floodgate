@@ -41,7 +41,7 @@ class SummaryNotification extends Notification
 
         return (new MailMessage)
             ->subject('You have new notifications')
-            ->view('floodgate::summary', [
+            ->markdown('floodgate::summary', [
                 'summary' => $this->summary,
                 'items' => $items,
             ]);
