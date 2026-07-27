@@ -58,24 +58,6 @@ class SummaryNotificationTest extends TestCase
     }
 
     #[Test]
-    public function it_uses_the_custom_subject_from_the_summary(): void
-    {
-        // Given
-        $user = $this->createUser();
-        $summary = (new Summary)
-            ->message(':count issues assigned')
-            ->with(['count' => 2])
-            ->subject('Your issue activity summary');
-        $notification = new SummaryNotification($summary, [], ['mail']);
-
-        // When
-        $mail = $notification->toMail($user);
-
-        // Then
-        $this->assertEquals('Your issue activity summary', $mail->subject);
-    }
-
-    #[Test]
     public function it_includes_the_title_in_the_rendered_mail(): void
     {
         // Given
@@ -92,6 +74,24 @@ class SummaryNotificationTest extends TestCase
         // Then
         $this->assertStringContainsString('Issue Activity', $rendered);
         $this->assertStringContainsString('2 issues assigned', $rendered);
+    }
+
+    #[Test]
+    public function it_uses_the_custom_subject_from_the_summary(): void
+    {
+        // Given
+        $user = $this->createUser();
+        $summary = (new Summary)
+            ->message(':count issues assigned')
+            ->with(['count' => 2])
+            ->subject('Your issue activity summary');
+        $notification = new SummaryNotification($summary, [], ['mail']);
+
+        // When
+        $mail = $notification->toMail($user);
+
+        // Then
+        $this->assertEquals('Your issue activity summary', $mail->subject);
     }
 
     #[Test]
