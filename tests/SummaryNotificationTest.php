@@ -24,18 +24,17 @@ class SummaryNotificationTest extends TestCase
     }
 
     #[Test]
-    public function it_returns_the_summary_array(): void
+    public function it_delegates_array_conversion_to_the_summary(): void
     {
         // Given
         $summary = (new Summary)->message(':count issues assigned')->with(['count' => 3]);
         $notification = new SummaryNotification($summary, [], ['mail']);
-        $user = $this->createUser();
 
         // When
-        $result = $notification->toArray($user);
+        $result = $notification->toArray($this->createUser());
 
         // Then
-        $this->assertEquals(['message' => ':count issues assigned', 'data' => ['count' => 3]], $result);
+        $this->assertEquals($summary->toArray(), $result);
     }
 
     #[Test]
