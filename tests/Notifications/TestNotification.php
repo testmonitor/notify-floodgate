@@ -8,6 +8,7 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use TestMonitor\Floodgate\Concerns\Gateable;
 use TestMonitor\Floodgate\Middleware\ThrottlesNotifications;
+use TestMonitor\Floodgate\Notifications\Summary;
 
 class TestNotification extends Notification implements ShouldQueue
 {
@@ -35,11 +36,10 @@ class TestNotification extends Notification implements ShouldQueue
         return ['message' => 'Test notification'];
     }
 
-    public function toSummary(array $items): array
+    public function toSummary(array $items): Summary
     {
-        return [
-            'message' => ':count test notifications',
-            'properties' => ['count' => count($items)],
-        ];
+        return (new Summary)
+            ->message(':count test notifications')
+            ->with(['count' => count($items)]);
     }
 }

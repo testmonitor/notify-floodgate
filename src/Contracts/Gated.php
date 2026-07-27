@@ -2,6 +2,8 @@
 
 namespace TestMonitor\Floodgate\Contracts;
 
+use TestMonitor\Floodgate\Notifications\Summary;
+
 interface Gated
 {
     /*
@@ -17,5 +19,5 @@ interface Gated
     /*
      * Return a grouped summary of multiple buffered notifications of this type.
      */
-    public function toSummary(array $items): array;
+    public function toSummary(array $items): Summary;
 }

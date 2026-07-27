@@ -1,16 +1,22 @@
 @component('mail::message')
-# {{ __($summary['message'] ?? 'You have new notifications', $summary['properties'] ?? []) }}
+@if ($summary->title)
+# {{ __($summary->title, $summary->data) }}
+@endif
+
+{{ __($summary->message, $summary->data) }}
 
 @component('mail::table')
-| # | Notification |
+| # | @lang('Notification') |
 | - | ----------- |
 @foreach ($items as $index => $item)
-| {{ $index + 1 }} | [{{ __($item['message'] ?? '', $item['properties'] ?? []) }}]({{ $item['url'] ?? '#' }}) |
+| {{ $index + 1 }} | [{{ __($item['message'] ?? '', $item['data'] ?? []) }}]({{ $item['url'] ?? '#' }}) |
 @endforeach
 @endcomponent
 
-@component('mail::button', ['url' => $summary['url'] ?? '/'])
-View
+@if ($summary->actionText)
+@component('mail::button', ['url' => $summary->actionUrl])
+@lang($summary->actionText)
 @endcomponent
+@endif
 
 @endcomponent
