@@ -41,6 +41,8 @@ class SummaryNotification extends Notification
      */
     public function __call(string $method, array $parameters): mixed
     {
-        return $this->summary->resolveChannel(lcfirst(substr($method, 2)), $parameters[0] ?? null, $this->notifications);
+        $channel = lcfirst(substr($method, 2));
+
+        return $this->summary->resolveChannel($channel, $parameters[0] ?? null, $this->notifications);
     }
 }

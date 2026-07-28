@@ -40,7 +40,8 @@ class Summary
     {
         if (! $this->hasChannel($channel)) {
             throw new RuntimeException(
-                "No summary builder registered for channel [{$channel}]. Use ->channel('{$channel}', ...) to define one."
+                "No summary builder registered for channel [{$channel}]. " .
+                "Use ->channel('{$channel}', ...) to define one."
             );
         }
 
