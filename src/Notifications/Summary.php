@@ -99,11 +99,10 @@ class Summary implements Arrayable
      */
     public function toArray(): array
     {
-        return array_filter([
+        return array_merge($this->data, array_filter([
             'title' => $this->title,
             'message' => $this->message,
-            'data' => $this->data,
             'url' => $this->actionUrl,
-        ], fn ($value) => ! is_null($value));
+        ], fn ($value) => ! is_null($value)));
     }
 }

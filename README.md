@@ -111,20 +111,16 @@ public function toSummary(array $items): Summary
 {
     return (new Summary)
         ->title('Issue Activity')
-        ->message(':count issues have been assigned to you')
+        ->message(__(':count issues have been assigned to you', ['count' => count($items)]))
         ->with(['count' => count($items)])
         ->subject('Your issue activity summary')
         ->action('View Issues', route('issues.index'));
 }
 ```
 
-`title`, `subject` and `action` are all optional:
+Use `title`, `subject` and `action` to shape the mail, all optional: `title` adds a heading above the message, `subject` sets the mail subject (falling back to `title`, then "You have new notifications"), and `action` adds a button. `with()` lets you attach extra data to the summary's database record.
 
-- `title`, when set, is rendered as a heading with `message` as regular text below it; otherwise only `message` is rendered.
-- `subject`, when omitted, falls back to `title`, then to "You have new notifications".
-- `action`, when omitted, renders no button.
-
-When a summary is sent, the `toArray` method on each individual notification is passed to the summary mail view as `$items`, allowing you to include per-item detail alongside the grouped summary.
+Each notification's own `toArray()` is also passed to the mail view as `$items`, so you can show per-item detail alongside the summary.
 
 ### Customizing the Buffer Window
 

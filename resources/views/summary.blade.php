@@ -1,9 +1,9 @@
 @component('mail::message')
 @if ($summary->title)
-# {{ __($summary->title, $summary->data) }}
+# {{ $summary->title }}
 @endif
 
-{{ __($summary->message, $summary->data) }}
+{{ $summary->message }}
 
 @component('mail::table')
 | # | @lang('Notification') |
@@ -15,7 +15,7 @@
 
 @if ($summary->actionText)
 @component('mail::button', ['url' => $summary->actionUrl])
-@lang($summary->actionText)
+{{ $summary->actionText }}
 @endcomponent
 @endif
 

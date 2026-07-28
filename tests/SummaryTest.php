@@ -43,6 +43,27 @@ class SummaryTest extends TestCase
         $result = $summary->toArray();
 
         // Then
-        $this->assertEquals(['message' => ':count issues assigned', 'data' => ['count' => 3]], $result);
+        $this->assertEquals(['count' => 3, 'message' => ':count issues assigned'], $result);
+    }
+
+    #[Test]
+    public function it_does_not_let_with_data_overwrite_the_summary_fields(): void
+    {
+        // Given
+        $summary = (new Summary)
+            ->title('Issue Activity')
+            ->message(':count issues assigned')
+            ->action('View Issues', 'https://example.test/issues')
+            ->with(['title' => 'Overwritten', 'message' => 'Overwritten', 'url' => 'https://example.test/other']);
+
+        // When
+        $result = $summary->toArray();
+
+        // Then
+        $this->assertEquals([
+            'title' => 'Issue Activity',
+            'message' => ':count issues assigned',
+            'url' => 'https://example.test/issues',
+        ], $result);
     }
 }

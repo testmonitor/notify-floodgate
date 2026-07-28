@@ -42,7 +42,7 @@ class SummaryNotificationTest extends TestCase
     {
         // Given
         $user = $this->createUser();
-        $summary = (new Summary)->message(':count issues assigned')->with(['count' => 2]);
+        $summary = (new Summary)->message('2 issues assigned');
         $notifications = [new TestNotification, new TestNotification];
         $notification = new SummaryNotification($summary, $notifications, ['mail']);
 
@@ -63,8 +63,7 @@ class SummaryNotificationTest extends TestCase
         $user = $this->createUser();
         $summary = (new Summary)
             ->title('Issue Activity')
-            ->message(':count issues assigned')
-            ->with(['count' => 2]);
+            ->message('2 issues assigned');
         $notification = new SummaryNotification($summary, [], ['mail']);
 
         // When
@@ -81,8 +80,7 @@ class SummaryNotificationTest extends TestCase
         // Given
         $user = $this->createUser();
         $summary = (new Summary)
-            ->message(':count issues assigned')
-            ->with(['count' => 2])
+            ->message('2 issues assigned')
             ->subject('Your issue activity summary');
         $notification = new SummaryNotification($summary, [], ['mail']);
 
@@ -100,8 +98,7 @@ class SummaryNotificationTest extends TestCase
         $user = $this->createUser();
         $summary = (new Summary)
             ->title('Issue Activity')
-            ->message(':count issues assigned')
-            ->with(['count' => 2]);
+            ->message('2 issues assigned');
         $notification = new SummaryNotification($summary, [], ['mail']);
 
         // When
@@ -118,8 +115,7 @@ class SummaryNotificationTest extends TestCase
         $user = $this->createUser();
         $summary = (new Summary)
             ->title('Issue Activity')
-            ->message(':count issues assigned')
-            ->with(['count' => 2])
+            ->message('2 issues assigned')
             ->subject('Your issue activity summary');
         $notification = new SummaryNotification($summary, [], ['mail']);
 
@@ -136,8 +132,7 @@ class SummaryNotificationTest extends TestCase
         // Given
         $user = $this->createUser();
         $summary = (new Summary)
-            ->message(':count issues assigned')
-            ->with(['count' => 2])
+            ->message('2 issues assigned')
             ->action('View Issues', 'https://example.test/issues');
         $notification = new SummaryNotification($summary, [], ['mail']);
 
@@ -155,7 +150,7 @@ class SummaryNotificationTest extends TestCase
     {
         // Given
         $user = $this->createUser();
-        $summary = (new Summary)->message(':count issues assigned')->with(['count' => 2]);
+        $summary = (new Summary)->message('2 issues assigned');
         $notification = new SummaryNotification($summary, [], ['mail']);
 
         // When
