@@ -2,11 +2,9 @@
 
 namespace TestMonitor\Floodgate\Tests;
 
-use Illuminate\Notifications\Messages\MailMessage;
 use PHPUnit\Framework\Attributes\Test;
 use TestMonitor\Floodgate\Notifications\Summary;
 use TestMonitor\Floodgate\Notifications\SummaryNotification;
-use TestMonitor\Floodgate\Tests\Notifications\TestNotification;
 
 class SummaryNotificationTest extends TestCase
 {
@@ -24,139 +22,47 @@ class SummaryNotificationTest extends TestCase
     }
 
     #[Test]
-    public function it_delegates_array_conversion_to_the_summary(): void
-    {
-        // Given
-        $summary = (new Summary)->message(':count issues assigned')->with(['count' => 3]);
-        $notification = new SummaryNotification($summary, [], ['mail']);
-
-        // When
-        $result = $notification->toArray($this->createUser());
-
-        // Then
-        $this->assertEquals($summary->toArray(), $result);
-    }
-
-    #[Test]
-    public function it_builds_a_mail_message_with_summary_and_items(): void
+    public function it_builds_the_database_representation_via_the_registered_channel_builder(): void
     {
         // Given
         $user = $this->createUser();
-        $summary = (new Summary)->message('2 issues assigned');
-        $notifications = [new TestNotification, new TestNotification];
-        $notification = new SummaryNotification($summary, $notifications, ['mail']);
+        $summary = (new Summary)->channel('database', fn ($notifiable, $notifications) => ['count' => count($notifications)]);
+        $notification = new SummaryNotification($summary, ['a', 'b'], ['database']);
 
         // When
-        $mail = $notification->toMail($user);
+        $result = $notification->toArray($user);
 
         // Then
-        $this->assertInstanceOf(MailMessage::class, $mail);
-        $this->assertEquals('You have new notifications', $mail->subject);
-        $this->assertCount(2, $mail->viewData['items']);
-        $this->assertEquals($summary, $mail->viewData['summary']);
+        $this->assertEquals(['count' => 2], $result);
     }
 
     #[Test]
-    public function it_includes_the_title_in_the_rendered_mail(): void
+    public function it_builds_the_mail_representation_via_the_registered_channel_builder(): void
     {
         // Given
         $user = $this->createUser();
-        $summary = (new Summary)
-            ->title('Issue Activity')
-            ->message('2 issues assigned');
+        $summary = (new Summary)->channel('mail', fn ($notifiable, $notifications) => 'a custom mailable');
         $notification = new SummaryNotification($summary, [], ['mail']);
 
         // When
-        $rendered = $notification->toMail($user)->render();
+        $result = $notification->toMail($user);
 
         // Then
-        $this->assertStringContainsString('Issue Activity', $rendered);
-        $this->assertStringContainsString('2 issues assigned', $rendered);
+        $this->assertEquals('a custom mailable', $result);
     }
 
     #[Test]
-    public function it_uses_the_custom_subject_from_the_summary(): void
+    public function it_delegates_arbitrary_channels_to_the_registered_channel_builder(): void
     {
         // Given
         $user = $this->createUser();
-        $summary = (new Summary)
-            ->message('2 issues assigned')
-            ->subject('Your issue activity summary');
-        $notification = new SummaryNotification($summary, [], ['mail']);
+        $summary = (new Summary)->channel('slack', fn ($notifiable, $notifications) => 'a slack message');
+        $notification = new SummaryNotification($summary, [], ['slack']);
 
         // When
-        $mail = $notification->toMail($user);
+        $result = $notification->toSlack($user);
 
         // Then
-        $this->assertEquals('Your issue activity summary', $mail->subject);
-    }
-
-    #[Test]
-    public function it_falls_back_to_the_title_as_subject_when_no_subject_is_set(): void
-    {
-        // Given
-        $user = $this->createUser();
-        $summary = (new Summary)
-            ->title('Issue Activity')
-            ->message('2 issues assigned');
-        $notification = new SummaryNotification($summary, [], ['mail']);
-
-        // When
-        $mail = $notification->toMail($user);
-
-        // Then
-        $this->assertEquals('Issue Activity', $mail->subject);
-    }
-
-    #[Test]
-    public function it_prefers_the_custom_subject_over_the_title(): void
-    {
-        // Given
-        $user = $this->createUser();
-        $summary = (new Summary)
-            ->title('Issue Activity')
-            ->message('2 issues assigned')
-            ->subject('Your issue activity summary');
-        $notification = new SummaryNotification($summary, [], ['mail']);
-
-        // When
-        $mail = $notification->toMail($user);
-
-        // Then
-        $this->assertEquals('Your issue activity summary', $mail->subject);
-    }
-
-    #[Test]
-    public function it_renders_the_action_button_when_set(): void
-    {
-        // Given
-        $user = $this->createUser();
-        $summary = (new Summary)
-            ->message('2 issues assigned')
-            ->action('View Issues', 'https://example.test/issues');
-        $notification = new SummaryNotification($summary, [], ['mail']);
-
-        // When
-        $rendered = $notification->toMail($user)->render();
-
-        // Then
-        $this->assertStringContainsString('class="action"', $rendered);
-        $this->assertStringContainsString('View Issues', $rendered);
-        $this->assertStringContainsString('https://example.test/issues', $rendered);
-    }
-
-    #[Test]
-    public function it_omits_the_action_button_when_not_set(): void
-    {
-        // Given
-        $user = $this->createUser();
-        $summary = (new Summary)->message('2 issues assigned');
-        $notification = new SummaryNotification($summary, [], ['mail']);
-
-        // When
-        $rendered = $notification->toMail($user)->render();
-
-        // Then
-        $this->assertStringNotContainsString('class="action"', $rendered);
+        $this->assertEquals('a slack message', $result);
     }
 }

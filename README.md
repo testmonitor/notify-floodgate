@@ -102,25 +102,26 @@ That's all the setup required. The floodgate will now buffer notifications withi
 
 ### Sending a Summary
 
-Implement `toSummary` on your notification to define what the summary looks like. It receives all buffered notification instances and should return a `Summary` value object:
+Implement `toSummary` on your notification to define what the summary looks like. It receives all buffered notification instances and should return a `Summary` value object. The `Summary` itself doesn't know how to render anything — for every channel your notification is sent on, register a builder via `channel()`:
 
 ```php
+use Illuminate\Notifications\Messages\MailMessage;
 use TestMonitor\Floodgate\Notifications\Summary;
 
 public function toSummary(array $items): Summary
 {
     return (new Summary)
-        ->title('Issue Activity')
-        ->message(__(':count issues have been assigned to you', ['count' => count($items)]))
-        ->with(['count' => count($items)])
-        ->subject('Your issue activity summary')
-        ->action('View Issues', route('issues.index'));
+        ->channel('mail', fn ($notifiable, $notifications) => (new MailMessage)
+            ->subject('Your issue activity summary')
+            ->line(__(':count issues have been assigned to you', ['count' => count($notifications)]))
+            ->action('View Issues', route('issues.index')))
+        ->channel('database', fn ($notifiable, $notifications) => [
+            'count' => count($notifications),
+        ]);
 }
 ```
 
-Use `title`, `subject` and `action` to shape the mail, all optional: `title` adds a heading above the message, `subject` sets the mail subject (falling back to `title`, then "You have new notifications"), and `action` adds a button. `with()` lets you attach extra data to the summary's database record.
-
-Each notification's own `toArray()` is also passed to the mail view as `$items`, so you can show per-item detail alongside the summary.
+Each closure receives the notifiable and the buffered notification instances, and returns whatever that channel expects — a `MailMessage` or `Mailable` for `mail`, an array for `database`, and so on for any other channel your notification uses. If a channel is included in `via()` but has no registered builder, resolving it throws a `RuntimeException`.
 
 ### Customizing the Buffer Window
 
@@ -156,34 +157,25 @@ $user->notify((new IssueAssigned($issue))->withoutThrottling());
 
 ### Customizing the Summary Notification
 
-The default `SummaryNotification` renders a mail view with `$summary` and `$items` variables. Publish the view to customise it:
-
-```bash
-php artisan vendor:publish --tag=floodgate-views
-```
-
-For full control, replace the summary class in the configuration:
+For full control over the notification itself (rather than the per-channel builders), replace the summary class in the configuration:
 
 ```php
 'summary' => App\Notifications\IssueSummaryNotification::class,
 ```
 
-Your custom class receives a `Summary` value object, the buffered `$notifications`, and `$channels` in its constructor. Extend the default to override only what you need, for example the mail view:
+Your custom class receives a `Summary` value object, the buffered `$notifications`, and `$channels` in its constructor. Extend the default to override only what you need:
 
 ```php
-use Illuminate\Notifications\Messages\MailMessage;
 use TestMonitor\Floodgate\Notifications\SummaryNotification;
 
 class IssueSummaryNotification extends SummaryNotification
 {
-    public function toMail(mixed $notifiable): MailMessage
+    public function toMail(mixed $notifiable): mixed
     {
         return parent::toMail($notifiable)->cc('team@example.com');
     }
 }
 ```
-
-To customize the subject on a per-notification basis, set it via the `subject` property when building the `Summary` in `toSummary()` instead (see [Sending a Summary](#sending-a-summary)).
 
 ## Tests
 

@@ -45,10 +45,7 @@ class FlushingNotificationsTest extends TestCase
 
         // Then
         Notification::assertSentTo($user, SummaryNotification::class, function ($notification) use ($user) {
-            return $notification->toArray($user) === [
-                'count' => 3,
-                'message' => '3 test notifications',
-            ];
+            return $notification->toArray($user) === ['count' => 3];
         });
         Notification::assertNotSentTo($user, TestNotification::class);
     }

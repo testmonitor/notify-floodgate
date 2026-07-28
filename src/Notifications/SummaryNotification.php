@@ -2,7 +2,6 @@
 
 namespace TestMonitor\Floodgate\Notifications;
 
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 class SummaryNotification extends Notification
@@ -22,28 +21,26 @@ class SummaryNotification extends Notification
     }
 
     /*
-     * Return the summary array for the database channel.
+     * Build the database representation using the summary's registered builder.
      */
     public function toArray(mixed $notifiable): array
     {
-        return $this->summary->toArray();
+        return $this->summary->resolveChannel('database', $notifiable, $this->notifications);
     }
 
     /*
-     * Build the mail representation, passing both the summary and per-item detail to the view.
+     * Build the mail representation using the summary's registered builder.
      */
-    public function toMail(mixed $notifiable): MailMessage
+    public function toMail(mixed $notifiable): mixed
     {
-        $items = array_map(
-            fn ($notification) => $notification->toArray($notifiable),
-            $this->notifications
-        );
+        return $this->summary->resolveChannel('mail', $notifiable, $this->notifications);
+    }
 
-        return (new MailMessage)
-            ->subject($this->summary->subject ?? $this->summary->title ?? __('You have new notifications'))
-            ->markdown('floodgate::summary', [
-                'summary' => $this->summary,
-                'items' => $items,
-            ]);
+    /*
+     * Delegate any other channel (e.g. toSlack, toBroadcast) to the summary's registered builder.
+     */
+    public function __call(string $method, array $parameters): mixed
+    {
+        return $this->summary->resolveChannel(lcfirst(substr($method, 2)), $parameters[0] ?? null, $this->notifications);
     }
 }

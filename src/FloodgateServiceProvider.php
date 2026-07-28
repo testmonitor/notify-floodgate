@@ -10,7 +10,6 @@ class FloodgateServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->publishConfig();
-        $this->publishViews();
     }
 
     public function register(): void
@@ -28,14 +27,5 @@ class FloodgateServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__ . '/../config/floodgate.php' => config_path('floodgate.php'),
         ], 'floodgate-config');
-    }
-
-    protected function publishViews(): void
-    {
-        $this->loadViewsFrom(__DIR__ . '/../resources/views', 'floodgate');
-
-        $this->publishes([
-            __DIR__ . '/../resources/views' => resource_path('views/vendor/floodgate'),
-        ], 'floodgate-views');
     }
 }
