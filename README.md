@@ -102,19 +102,27 @@ That's all the setup required. The floodgate will now buffer notifications withi
 
 ### Sending a Summary
 
-Implement `toSummary` on your notification to define what the summary looks like. It receives all buffered notification instances and should return an array shaped like your `toArray` method:
+Implement `toSummary` on your notification to define what the summary looks like. It receives all buffered notification instances and should return a `Summary` value object:
 
 ```php
-public function toSummary(array $items): array
+use TestMonitor\Floodgate\Notifications\Summary;
+
+public function toSummary(array $items): Summary
 {
-    return [
-        'message' => ':count issues have been assigned to you',
-        'url' => route('issues.index'),
-        'icon' => 'exclamation-circle',
-        'properties' => ['count' => count($items)],
-    ];
+    return (new Summary)
+        ->title('Issue Activity')
+        ->message(':count issues have been assigned to you')
+        ->with(['count' => count($items)])
+        ->subject('Your issue activity summary')
+        ->action('View Issues', route('issues.index'));
 }
 ```
+
+`title`, `subject` and `action` are all optional:
+
+- `title`, when set, is rendered as a heading with `message` as regular text below it; otherwise only `message` is rendered.
+- `subject`, when omitted, falls back to "You have new notifications".
+- `action`, when omitted, renders no button.
 
 When a summary is sent, the `toArray` method on each individual notification is passed to the summary mail view as `$items`, allowing you to include per-item detail alongside the grouped summary.
 
@@ -164,19 +172,22 @@ For full control, replace the summary class in the configuration:
 'summary' => App\Notifications\IssueSummaryNotification::class,
 ```
 
-Your custom class receives `$summary`, `$notifications`, and `$channels` in its constructor. Extend the default to override only what you need:
+Your custom class receives a `Summary` value object, the buffered `$notifications`, and `$channels` in its constructor. Extend the default to override only what you need, for example the mail view:
 
 ```php
+use Illuminate\Notifications\Messages\MailMessage;
 use TestMonitor\Floodgate\Notifications\SummaryNotification;
 
 class IssueSummaryNotification extends SummaryNotification
 {
-    protected function subject(): string
+    public function toMail(mixed $notifiable): MailMessage
     {
-        return 'Your issue activity summary';
+        return parent::toMail($notifiable)->cc('team@example.com');
     }
 }
 ```
+
+To customize the subject on a per-notification basis, set it via the `subject` property when building the `Summary` in `toSummary()` instead (see [Sending a Summary](#sending-a-summary)).
 
 ## Tests
 

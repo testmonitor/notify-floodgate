@@ -8,7 +8,7 @@ use Illuminate\Notifications\Notification;
 class SummaryNotification extends Notification
 {
     public function __construct(
-        protected array $summary,
+        protected Summary $summary,
         protected array $notifications,
         protected array $channels,
     ) {}
@@ -26,7 +26,7 @@ class SummaryNotification extends Notification
      */
     public function toArray(mixed $notifiable): array
     {
-        return $this->summary;
+        return $this->summary->toArray();
     }
 
     /*
@@ -40,7 +40,7 @@ class SummaryNotification extends Notification
         );
 
         return (new MailMessage)
-            ->subject('You have new notifications')
+            ->subject($this->summary->subject ?? __('You have new notifications'))
             ->markdown('floodgate::summary', [
                 'summary' => $this->summary,
                 'items' => $items,

@@ -2,6 +2,8 @@
 
 namespace TestMonitor\Floodgate\Concerns;
 
+use TestMonitor\Floodgate\Notifications\Summary;
+
 trait Gateable
 {
     protected bool $floodgateExempt = false;
@@ -27,5 +29,5 @@ trait Gateable
     /*
      * Return a grouped summary of multiple buffered notifications of this type.
      */
-    abstract public function toSummary(array $items): array;
+    abstract public function toSummary(array $items): Summary;
 }
