@@ -25,7 +25,7 @@ class Summary implements Arrayable
     public array $data = [];
 
     /**
-     * The mail subject.
+     * The mail subject. Falls back to the title when not set.
      */
     public ?string $subject = null;
 

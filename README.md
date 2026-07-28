@@ -121,7 +121,7 @@ public function toSummary(array $items): Summary
 `title`, `subject` and `action` are all optional:
 
 - `title`, when set, is rendered as a heading with `message` as regular text below it; otherwise only `message` is rendered.
-- `subject`, when omitted, falls back to "You have new notifications".
+- `subject`, when omitted, falls back to `title`, then to "You have new notifications".
 - `action`, when omitted, renders no button.
 
 When a summary is sent, the `toArray` method on each individual notification is passed to the summary mail view as `$items`, allowing you to include per-item detail alongside the grouped summary.

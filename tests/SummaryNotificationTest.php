@@ -94,6 +94,43 @@ class SummaryNotificationTest extends TestCase
     }
 
     #[Test]
+    public function it_falls_back_to_the_title_as_subject_when_no_subject_is_set(): void
+    {
+        // Given
+        $user = $this->createUser();
+        $summary = (new Summary)
+            ->title('Issue Activity')
+            ->message(':count issues assigned')
+            ->with(['count' => 2]);
+        $notification = new SummaryNotification($summary, [], ['mail']);
+
+        // When
+        $mail = $notification->toMail($user);
+
+        // Then
+        $this->assertEquals('Issue Activity', $mail->subject);
+    }
+
+    #[Test]
+    public function it_prefers_the_custom_subject_over_the_title(): void
+    {
+        // Given
+        $user = $this->createUser();
+        $summary = (new Summary)
+            ->title('Issue Activity')
+            ->message(':count issues assigned')
+            ->with(['count' => 2])
+            ->subject('Your issue activity summary');
+        $notification = new SummaryNotification($summary, [], ['mail']);
+
+        // When
+        $mail = $notification->toMail($user);
+
+        // Then
+        $this->assertEquals('Your issue activity summary', $mail->subject);
+    }
+
+    #[Test]
     public function it_renders_the_action_button_when_set(): void
     {
         // Given
