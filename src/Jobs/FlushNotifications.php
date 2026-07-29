@@ -8,7 +8,6 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use TestMonitor\Floodgate\Cache\FloodgateStore;
-use TestMonitor\Floodgate\Notifications\SummaryNotification;
 
 class FlushNotifications implements ShouldQueue
 {
@@ -56,12 +55,6 @@ class FlushNotifications implements ShouldQueue
      */
     protected function sendSummary(array $notifications): void
     {
-        $summary = $notifications[0]->toSummary($notifications);
-
-        $summaryClass = config('floodgate.summary', SummaryNotification::class);
-
-        $this->notifiable->notify(
-            new $summaryClass($summary, $notifications, $this->channels)
-        );
+        $this->notifiable->notify($notifications[0]->toSummary($notifications, $this->channels));
     }
 }

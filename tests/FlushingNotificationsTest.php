@@ -7,8 +7,8 @@ use Illuminate\Support\Facades\Notification;
 use PHPUnit\Framework\Attributes\Test;
 use TestMonitor\Floodgate\Cache\FloodgateStore;
 use TestMonitor\Floodgate\Jobs\FlushNotifications;
-use TestMonitor\Floodgate\Notifications\SummaryNotification;
 use TestMonitor\Floodgate\Tests\Notifications\TestNotification;
+use TestMonitor\Floodgate\Tests\Notifications\TestSummaryNotification;
 
 class FlushingNotificationsTest extends TestCase
 {
@@ -26,7 +26,7 @@ class FlushingNotificationsTest extends TestCase
 
         // Then
         Notification::assertSentTo($user, TestNotification::class);
-        Notification::assertNotSentTo($user, SummaryNotification::class);
+        Notification::assertNotSentTo($user, TestSummaryNotification::class);
     }
 
     #[Test]
@@ -44,7 +44,7 @@ class FlushingNotificationsTest extends TestCase
         Bus::dispatched(FlushNotifications::class)->first()->handle(app(FloodgateStore::class));
 
         // Then
-        Notification::assertSentTo($user, SummaryNotification::class, function ($notification) use ($user) {
+        Notification::assertSentTo($user, TestSummaryNotification::class, function ($notification) use ($user) {
             return $notification->toArray($user) === ['count' => 3];
         });
         Notification::assertNotSentTo($user, TestNotification::class);
@@ -66,7 +66,7 @@ class FlushingNotificationsTest extends TestCase
 
         // Then
         Notification::assertSentTo($user, TestNotification::class);
-        Notification::assertNotSentTo($user, SummaryNotification::class);
+        Notification::assertNotSentTo($user, TestSummaryNotification::class);
     }
 
     #[Test]

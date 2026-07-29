@@ -2,7 +2,7 @@
 
 namespace TestMonitor\Floodgate\Contracts;
 
-use TestMonitor\Floodgate\Notifications\Summary;
+use Illuminate\Notifications\Notification;
 
 interface Gated
 {
@@ -17,7 +17,8 @@ interface Gated
     public function isFloodgateExempt(): bool;
 
     /*
-     * Return a grouped summary of multiple buffered notifications of this type.
+     * Return a notification that summarizes multiple buffered notifications of this type.
+     * $channels are the channels this summary must be sent on (the ones this batch was buffered for).
      */
-    public function toSummary(array $notifications): Summary;
+    public function toSummary(array $notifications, array $channels): Notification;
 }

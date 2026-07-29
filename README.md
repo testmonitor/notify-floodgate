@@ -17,7 +17,6 @@ A Laravel package that prevents notification floods by buffering queued notifica
   - [Customizing the Buffer Window](#customizing-the-buffer-window)
   - [Customizing the Threshold](#customizing-the-threshold)
   - [Bypassing the Floodgate](#bypassing-the-floodgate)
-  - [Customizing the Summary Notification](#customizing-the-summary-notification)
 - [Tests](#tests)
 - [Changelog](#changelog)
 - [Contributing](#contributing)
@@ -53,12 +52,6 @@ return [
      * grouped and sent as a single summary.
      */
     'delay' => 10,
-
-    /*
-     * The notification class used to send a summary when multiple notifications
-     * are buffered. Swap this for your own class to fully customize the output.
-     */
-    'summary' => \TestMonitor\Floodgate\Notifications\SummaryNotification::class,
 
     /*
      * Cache store and key prefix used to hold buffered notifications.
@@ -102,26 +95,44 @@ That's all the setup required. The floodgate will now buffer notifications withi
 
 ### Sending a Summary
 
-Implement `toSummary` on your notification to define what the summary looks like. It receives all buffered notification instances and should return a `Summary` value object. The `Summary` itself doesn't know how to render anything — for every channel your notification is sent on, register a builder via `channel()`:
+Implement `toSummary` on your notification to define what the summary looks like. It receives all buffered notification instances plus the `$channels` this particular batch was buffered for, and should return a regular notification — write it exactly like any other notification class, with its own `via()`, `toMail()`, `toArray()`, and so on:
 
 ```php
-use Illuminate\Notifications\Messages\MailMessage;
-use TestMonitor\Floodgate\Notifications\Summary;
+use Illuminate\Notifications\Notification;
 
-public function toSummary(array $notifications): Summary
+public function toSummary(array $notifications, array $channels): Notification
 {
-    return (new Summary)
-        ->channel('mail', fn ($notifiable, $notifications) => (new MailMessage)
-            ->subject('Your issue activity summary')
-            ->line(__(':count issues have been assigned to you', ['count' => count($notifications)]))
-            ->action('View Issues', route('issues.index')))
-        ->channel('database', fn ($notifiable, $notifications) => [
-            'count' => count($notifications),
-        ]);
+    return new IssueActivitySummary($notifications, $channels);
 }
 ```
 
-Each closure receives the notifiable and the buffered notification instances, and returns whatever that channel expects — a `MailMessage` or `Mailable` for `mail`, an array for `database`, and so on for any other channel your notification uses. If a channel is included in `via()` but has no registered builder, resolving it throws a `RuntimeException`.
+```php
+use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Notifications\Notification;
+use TestMonitor\Floodgate\Concerns\SummarizesNotifications;
+
+class IssueActivitySummary extends Notification
+{
+    use SummarizesNotifications;
+
+    public function __construct(public array $notifications, public array $channels) {}
+
+    public function toMail(mixed $notifiable): MailMessage
+    {
+        return (new MailMessage)
+            ->subject('Your issue activity summary')
+            ->line(__(':count issues have been assigned to you', ['count' => count($this->notifications)]))
+            ->action('View Issues', route('issues.index'));
+    }
+
+    public function toArray(mixed $notifiable): array
+    {
+        return ['count' => count($this->notifications)];
+    }
+}
+```
+
+The `SummarizesNotifications` trait is optional and just saves you the boilerplate of adding the `$notifications`/`$channels` properties and a `via()` returning `$this->channels`. Return `$channels` rather than hardcoding them: each channel is buffered and flushed independently, so `toSummary` is called once per channel batch, and hardcoding e.g. `['mail', 'database']` would double-send whichever flushes second.
 
 ### Customizing the Buffer Window
 
@@ -153,28 +164,6 @@ Send a notification immediately, skipping the buffer entirely, by calling `witho
 
 ```php
 $user->notify((new IssueAssigned($issue))->withoutThrottling());
-```
-
-### Customizing the Summary Notification
-
-For full control over the notification itself (rather than the per-channel builders), replace the summary class in the configuration:
-
-```php
-'summary' => App\Notifications\IssueSummaryNotification::class,
-```
-
-Your custom class receives a `Summary` value object, the buffered `$notifications`, and `$channels` in its constructor. Extend the default to override only what you need:
-
-```php
-use TestMonitor\Floodgate\Notifications\SummaryNotification;
-
-class IssueSummaryNotification extends SummaryNotification
-{
-    public function toMail(mixed $notifiable): mixed
-    {
-        return parent::toMail($notifiable)->cc('team@example.com');
-    }
-}
 ```
 
 ## Tests

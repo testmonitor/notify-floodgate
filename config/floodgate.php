@@ -1,7 +1,5 @@
 <?php
 
-use TestMonitor\Floodgate\Notifications\SummaryNotification;
-
 return [
 
     /*
@@ -32,17 +30,5 @@ return [
         'store' => null,
         'prefix' => 'floodgate',
     ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | Summary Notification
-    |--------------------------------------------------------------------------
-    |
-    | Configuration for the summary notification sent when multiple
-    | notifications are buffered within the delay window.
-    |
-    */
-
-    'summary' => SummaryNotification::class,
 
 ];

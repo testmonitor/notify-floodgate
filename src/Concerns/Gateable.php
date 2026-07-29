@@ -2,7 +2,7 @@
 
 namespace TestMonitor\Floodgate\Concerns;
 
-use TestMonitor\Floodgate\Notifications\Summary;
+use Illuminate\Notifications\Notification;
 
 trait Gateable
 {
@@ -27,7 +27,8 @@ trait Gateable
     }
 
     /*
-     * Return a grouped summary of multiple buffered notifications of this type.
+     * Return a notification that summarizes multiple buffered notifications of this type.
+     * $channels are the channels this summary must be sent on (the ones this batch was buffered for).
      */
-    abstract public function toSummary(array $notifications): Summary;
+    abstract public function toSummary(array $notifications, array $channels): Notification;
 }
