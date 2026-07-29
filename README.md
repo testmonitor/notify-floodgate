@@ -108,7 +108,7 @@ Implement `toSummary` on your notification to define what the summary looks like
 use Illuminate\Notifications\Messages\MailMessage;
 use TestMonitor\Floodgate\Notifications\Summary;
 
-public function toSummary(array $items): Summary
+public function toSummary(array $notifications): Summary
 {
     return (new Summary)
         ->channel('mail', fn ($notifiable, $notifications) => (new MailMessage)

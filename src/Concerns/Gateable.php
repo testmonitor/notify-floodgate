@@ -29,5 +29,5 @@ trait Gateable
     /*
      * Return a grouped summary of multiple buffered notifications of this type.
      */
-    abstract public function toSummary(array $items): Summary;
+    abstract public function toSummary(array $notifications): Summary;
 }

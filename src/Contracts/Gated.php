@@ -19,5 +19,5 @@ interface Gated
     /*
      * Return a grouped summary of multiple buffered notifications of this type.
      */
-    public function toSummary(array $items): Summary;
+    public function toSummary(array $notifications): Summary;
 }

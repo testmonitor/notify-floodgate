@@ -36,10 +36,10 @@ class TestNotification extends Notification implements ShouldQueue
         return ['message' => 'Test notification'];
     }
 
-    public function toSummary(array $items): Summary
+    public function toSummary(array $notifications): Summary
     {
         return (new Summary)
-            ->channel('mail', fn () => (new MailMessage)->line(count($items) . ' test notifications'))
-            ->channel('database', fn () => ['count' => count($items)]);
+            ->channel('mail', fn () => (new MailMessage)->line(count($notifications) . ' test notifications'))
+            ->channel('database', fn () => ['count' => count($notifications)]);
     }
 }
